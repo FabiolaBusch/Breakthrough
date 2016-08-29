@@ -1,0 +1,64 @@
+package breakthroughPP.players;
+
+import breakthroughPP.preset.Move;
+
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import breakthroughPP.preset.Requestable;
+import breakthroughPP.gui.Showable;
+
+/**
+ * Class that represents the a player with "artificial intelligence" (chooses any of the valid
+ * moves randomly)
+ * <p>
+ * Georg-August University Goettingen
+ * APP breakthroughPP
+ * SoSe 2016
+ * @author Haseeb Sabar Anar
+ */
+public class RandomPlayer extends AbstractPlayer {
+
+	/** Random number generator for random move selection */
+	private final Random random = new Random();
+
+	/**
+	 * Constructor with input and output instances
+	 * @param input here an instance can be bound to which allows input of moves
+     * @param output here an instance can be bound to which allows output of the game board
+	 */
+	public RandomPlayer(Requestable input, Showable output){
+		super(input, output);
+	}
+		
+	/**
+	 * @return the type of the player
+	 * @see breakthroughPP.players.AbstractPlayer
+     */
+	@Override
+	public PlayerType getPlayerType(){
+		return PlayerType.RANDOM;
+	}
+
+	/**
+	 * Function that is called when the game wants the player to make a move.
+	 * The strategy is to choose a random move of all the valid moves this player
+	 * could do.
+	 * @see breakthroughPP.preset.Player
+     * @throws RemoteException if the connection with the net throws one
+	 * @throws Exception if another exception occures
+	 */
+	@Override
+	public Move request() throws Exception, RemoteException{
+
+		super.request();
+	
+		List<Move> validMoves = new ArrayList<Move>(board.getValidMoves(color));
+		
+		currentMove = validMoves.get(random.nextInt(validMoves.size()));
+		return currentMove;
+	}
+
+}

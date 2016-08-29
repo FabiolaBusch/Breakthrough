@@ -1,0 +1,66 @@
+package breakthroughPP.players;
+
+import breakthroughPP.mechanics.IOTransfer;
+import breakthroughPP.preset.*;
+import breakthroughPP.gui.Showable;
+
+/**
+ * Factory that creates players based on their types
+ * <p>
+ * Georg-August University Goettingen
+ * APP breakthroughPP
+ * SoSe 2016
+ * @author Haseeb Sabar Anar
+ */
+public class PlayerFactory implements Setting {
+
+    private static PlayerFactory instance = null;
+
+    /**
+     * Get the unique instance (singleton) of the player factory.
+     * @return the type of the player
+     * @see breakthroughPP.players.PlayerType
+     */
+    public static PlayerFactory getInstance(){
+        return instance == null ? new PlayerFactory() : instance;
+    }
+
+    /**
+     * Create a player instance of a type specified in the parameters of this function
+     * @param inouts Used to initialize the player (e.g. input)
+     * @param playerType choosen type, see below.
+	 * @param color color of the player
+     * @return the player which type was selected.
+     * @throws PlayerException if in invalid player type was selected.
+     * @see breakthroughPP.players.AdvancedPlayer
+     * @see breakthroughPP.players.AIPlayer
+     * @see breakthroughPP.players.InterActivePlayer
+     * @see breakthroughPP.players.RandomPlayer
+     */
+    public Player create(IOTransfer inouts, PlayerType playerType, int color) throws PlayerException {
+
+		Requestable in = null;
+		Showable out = null;
+
+		if(color == RED || color == 2) {
+			in = inouts.getInputMethodRed();
+			out= inouts.getOutputMethodRed();
+		} else if(color == BLUE) {
+			in = inouts.getInputMethodBlue();
+			out= inouts.getOutputMethodBlue();
+		}	
+
+        if(playerType == PlayerType.INTERACTIVE) {
+			return new InterActivePlayer(in,out);
+        } else if(playerType == PlayerType.COMPUTER) {
+            return new AdvancedPlayer(null,out);
+        } else if(playerType == PlayerType.RANDOM) {
+            return new RandomPlayer(null,out);
+        } else if(playerType == PlayerType.AIPLAYER) {
+            return new AIPlayer(null,out);
+        } else {
+            throw new PlayerException("Invalid player type in file");
+        }
+    }
+
+}

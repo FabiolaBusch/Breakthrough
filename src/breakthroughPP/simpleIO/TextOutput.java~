@@ -1,0 +1,133 @@
+package breakthroughPP.simpleIO;
+
+import breakthroughPP.preset.*;
+import breakthroughPP.helper.OSValidator;
+import breakthroughPP.gui.*;
+
+/**
+ * Class to generate and visualise a textual visualization of the current
+ * board state
+ * <p>
+ * Georg-August University Goettingen
+ * APP breakthroughPP
+ * SoSe 2016
+ *
+ * @author Haseeb Sabar Anar
+ */
+public class TextOutput implements Showable {
+
+    private final String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    /** The board viewer that is going to be converted to a text visualization */
+    private Viewer viewer;
+
+    /** Should the output be colorized ? */
+    boolean colorize = false;
+
+    /**
+     * Init constructor
+     * @param colorize True if output should be colorized with ANSI colors, false otherwise
+     */
+    public TextOutput(boolean colorize) {
+        this.colorize = colorize;
+        this.viewer = null;
+    }
+
+    /**
+     * Default Constructor
+     */
+    public TextOutput() {
+        viewer = null;
+        colorize = false;
+    }
+
+    /**
+     * Overridden toString method that generates the actual string representation of a board of the
+     * game
+     */
+    @Override
+    public String toString() {
+
+        // Colors for tokens that are printed to command line
+        final boolean isAnsiSupported = OSValidator.isUnix() || OSValidator.isSolaris() || OSValidator.isMac();
+        final String ANSI_RESET = isAnsiSupported && colorize ? "\u001B[0m" : "";
+        final String ANSI_RED = isAnsiSupported && colorize ? "\u001B[31m" : "";
+        final String ANSI_BLUE = isAnsiSupported && colorize ? "\u001B[34m" : "";
+
+        // Show circles as tokens if the system supports ansi coloring
+        // in the command line.
+        final String BLUE_TOKEN = isAnsiSupported && colorize ? "o" : "B";
+        final String RED_TOKEN = isAnsiSupported && colorize ? "o" : "R";
+
+        // Secure that viewer is non null in the following
+        if (viewer == null) {
+            return "TextOutput: null";
+        }
+
+        String s = " ";
+
+
+        // Characters header
+        s += "\n      ";
+        for (int letter = 0; letter < viewer.getDimX(); letter++) {
+            s += String.format(" %s ", alphabet.charAt(letter));
+        }
+        s += "\n\n";
+
+        // Field and tokens
+        for (int number = viewer.getDimY() - 1; number >= 0; number--) {
+            s += String.format("%3s   ", number + 1); // leading numbers
+            for (int letter = 0; letter < viewer.getDimX(); letter++) {
+                int color = viewer.getColor(letter, number);
+                if (color == Setting.RED) {
+                    s += String.format("[%s%s%s]", ANSI_RED, RED_TOKEN, ANSI_RESET);
+                } else if (color == Setting.BLUE) {
+                    s += String.format("[%s%s%s]", ANSI_BLUE, BLUE_TOKEN, ANSI_RESET);
+                } else {
+                    s += "[ ]";
+                }
+            }
+            s += String.format(" %3s   ", number + 1); // Trailing numbers
+            s += "\n";
+        }
+
+        // Characters footer
+        s += "\n      ";
+        for (int letter = 0; letter < viewer.getDimX(); letter++) {
+            s += String.format(" %s ", alphabet.charAt(letter));
+        }
+
+        // Report current Status of the board
+        s += "\n\nStatus of the board: " + viewer.getStatus();
+        return s;
+
+    }
+
+
+    /**
+     * Initialises the output instance
+     *
+     * @param viewer access to the board, color is ignored
+     * @see breakthroughPP.gui.Showable
+     */
+    @Override
+    public void init(Viewer viewer, int color) throws VisualisationException {
+        this.viewer = viewer;
+    }
+
+    /**
+     * Updates the output. This function shows an representation of the game board
+     *
+     * @throws VisualisationException if this instance has not been initialised yet or viewer equals
+     *                                null
+     * @see breakthroughPP.gui.Showable
+     */
+    @Override
+    public void update() throws VisualisationException {
+        if (viewer == null) {
+            throw new VisualisationException("Visualisation instance has not been initialised yet");
+        }
+        System.out.println(this);
+    }
+
+}
